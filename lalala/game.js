@@ -339,11 +339,85 @@ const player = {
 };
 
 // =============================================================
-// Input
+// Input — teclado + joystick táctil
 // =============================================================
 const input = {};
 window.addEventListener('keydown', (e) => { input[e.key.toLowerCase()] = true; });
 window.addEventListener('keyup',   (e) => { input[e.key.toLowerCase()] = false; });
+
+const joy = {
+  active: false,
+  id: null,        // identificador del touch que controla
+  baseX: 0, baseY: 0,
+  vec: { x: 0, z: 0 },  // valores normalizados -1..1
+  MAX: 60,         // radio máximo del arrastre en px (saturación)
+  DEAD: 0.18,      // zona muerta (porcentaje del radio)
+};
+
+function joyMove(x, y) {
+  let dx = x - joy.baseX;
+  let dy = y - joy.baseY;
+  const dist = Math.hypot(dx, dy);
+  if (dist > joy.MAX) {
+    dx = dx / dist * joy.MAX;
+    dy = dy / dist * joy.MAX;
+  }
+  joy.vec.x = dx / joy.MAX;
+  joy.vec.z = dy / joy.MAX;
+}
+function joyReset() {
+  joy.active = false;
+  joy.id = null;
+  joy.vec.x = 0;
+  joy.vec.z = 0;
+}
+
+function isUiTarget(el) {
+  // No activar el joystick si el toque empieza sobre la UI (mensajes/botones)
+  return !!(el && el.closest && el.closest('#message, #title-screen'));
+}
+
+document.addEventListener('touchstart', (e) => {
+  if (joy.active) return;
+  if (isUiTarget(e.target)) return;
+  const t = e.changedTouches[0];
+  joy.active = true;
+  joy.id = t.identifier;
+  joy.baseX = t.clientX;
+  joy.baseY = t.clientY;
+  joy.vec.x = 0;
+  joy.vec.z = 0;
+  e.preventDefault();
+}, { passive: false });
+
+document.addEventListener('touchmove', (e) => {
+  if (!joy.active) return;
+  for (const t of e.changedTouches) {
+    if (t.identifier === joy.id) {
+      joyMove(t.clientX, t.clientY);
+      e.preventDefault();
+      break;
+    }
+  }
+}, { passive: false });
+
+function endTouch(e) {
+  if (!joy.active) return;
+  for (const t of e.changedTouches) {
+    if (t.identifier === joy.id) {
+      joyReset();
+      break;
+    }
+  }
+}
+document.addEventListener('touchend',    endTouch);
+document.addEventListener('touchcancel', endTouch);
+
+// Cambia la pista del HUD si es un dispositivo táctil
+if (('ontouchstart' in window) || (navigator.maxTouchPoints || 0) > 0) {
+  const ctrl = document.getElementById('controls');
+  if (ctrl) ctrl.textContent = 'Arrastra el dedo para moverte';
+}
 
 // =============================================================
 // Helpers de escena
@@ -746,14 +820,22 @@ function isOnSafeGround(p) {
 function update(dt) {
   if (state === STATE.TITLE || state === STATE.PAUSED || !player.alive) return;
 
-  // Movimiento (relativo a la cámara mirando -Z)
+  // Movimiento (teclado + joystick suman vectores)
   const move = new THREE.Vector3();
   if (input['w'] || input['arrowup'])    move.z -= 1;
   if (input['s'] || input['arrowdown'])  move.z += 1;
   if (input['a'] || input['arrowleft'])  move.x -= 1;
   if (input['d'] || input['arrowright']) move.x += 1;
+  if (joy.active) {
+    const mag = Math.hypot(joy.vec.x, joy.vec.z);
+    if (mag > joy.DEAD) {
+      move.x += joy.vec.x;
+      move.z += joy.vec.z;
+    }
+  }
   if (move.lengthSq() > 0) {
-    move.normalize().multiplyScalar(player.speed * dt);
+    if (move.length() > 1) move.normalize();
+    move.multiplyScalar(player.speed * dt);
     player.pos.x += move.x;
     player.pos.z += move.z;
   }

@@ -2,14 +2,20 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Lalala</title>
 <style>
+  html, body { height: 100%; }
   body {
     margin: 0;
     overflow: hidden;
     background: #000;
     font-family: 'Trebuchet MS', Arial, sans-serif;
     color: white;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
   }
   canvas { display: block; }
   #info {
@@ -107,6 +113,19 @@
     font-family: inherit;
   }
   #title-screen button:hover { transform: scale(1.05); }
+
+  /* Layout más compacto en pantallas pequeñas (móvil) */
+  @media (max-width: 600px) {
+    #info {
+      font-size: 12px;
+      padding: 8px 10px;
+      max-width: 220px;
+    }
+    #info h1 { font-size: 14px; }
+    #title-screen h1 { font-size: 60px; letter-spacing: 4px; }
+    #title-screen p { font-size: 14px; padding: 0 24px; }
+    #message { font-size: 18px; padding: 22px 28px; }
+  }
 </style>
 </head>
 <body>
