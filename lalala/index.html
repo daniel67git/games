@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Lalala</title>
+<style>
+  body {
+    margin: 0;
+    overflow: hidden;
+    background: #000;
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+    color: white;
+  }
+  canvas { display: block; }
+  #info {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(0, 0, 0, 0.55);
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+    pointer-events: none;
+    border: 1px solid rgba(255, 170, 0, 0.4);
+    max-width: 320px;
+  }
+  #info h1 {
+    margin: 0 0 4px 0;
+    font-size: 18px;
+    color: #ffaa00;
+  }
+  #hint { opacity: 0.85; }
+  #keys-display { margin-top: 6px; color: #ffd700; font-weight: bold; }
+  #controls {
+    margin-top: 8px;
+    font-size: 11px;
+    opacity: 0.6;
+  }
+  #message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.88);
+    padding: 32px 48px;
+    border-radius: 14px;
+    text-align: center;
+    display: none;
+    font-size: 22px;
+    border: 2px solid #ffaa00;
+    box-shadow: 0 0 40px rgba(255, 170, 0, 0.5);
+    min-width: 280px;
+  }
+  #message-text { line-height: 1.5; }
+  #message button {
+    margin-top: 22px;
+    padding: 10px 28px;
+    font-size: 17px;
+    background: linear-gradient(180deg, #ffaa00, #ff7700);
+    color: #1a0a00;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-family: inherit;
+    transition: transform 0.1s;
+  }
+  #message button:hover { transform: scale(1.06); }
+  #title-screen {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #2a0a00, #000);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+  #title-screen h1 {
+    font-size: 88px;
+    margin: 0;
+    background: linear-gradient(180deg, #ffee00, #ff3300);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 40px rgba(255, 100, 0, 0.6);
+    letter-spacing: 6px;
+  }
+  #title-screen p {
+    max-width: 520px;
+    text-align: center;
+    line-height: 1.6;
+    opacity: 0.85;
+    padding: 0 20px;
+  }
+  #title-screen button {
+    margin-top: 24px;
+    padding: 14px 40px;
+    font-size: 20px;
+    background: linear-gradient(180deg, #ffaa00, #ff5500);
+    color: #1a0a00;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    font-family: inherit;
+  }
+  #title-screen button:hover { transform: scale(1.05); }
+</style>
+</head>
+<body>
+<div id="title-screen">
+  <h1>LALALA</h1>
+  <p>Eres una pequeña llama. Atraviesa tres islas — arena y hierro, diamante, y lava — para escapar. Elige bien tus caminos: no todos los portales llevan a la salvación.</p>
+  <button id="start-btn">Empezar</button>
+</div>
+
+<div id="info">
+  <h1 id="level-title">Nivel 1</h1>
+  <div id="hint">Cruza al otro lado</div>
+  <div id="keys-display"></div>
+  <div id="controls">WASD o flechas para moverte</div>
+</div>
+
+<div id="message">
+  <div id="message-text"></div>
+  <button id="message-button">Reintentar</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
