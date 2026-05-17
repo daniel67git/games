@@ -3,3 +3,4 @@ Hola! Estoy haciendo mis primeros pasos en (vibe)coding. Aqui teneis el catalogo
 ## Juegos
 
 - **[Lalala](https://daniel67git.github.io/games/lalala/)** — Juego en 3D. Eres una pequeña llama y tienes que cruzar tres islas (arena y hierro, diamante, y lava) eligiendo bien los portales y encontrando 3 llaves para escapar.
+- **[Hot Motors](https://daniel67git.github.io/games/hotmotors/)** — Carrera 2D. Dos coches, rojo y azul, compiten en una carretera sinuosa de montaña. El primero en hacer 3 vueltas gana. 1 jugador (vs IA) o 2 jugadores locales.

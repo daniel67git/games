@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Hot Motors</title>
+<style>
+  html, body { height: 100%; margin: 0; }
+  body {
+    overflow: hidden;
+    background: #1a1a1a;
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+    color: white;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  canvas { display: block; }
+
+  #title-screen {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #1a0010 0%, #1a1a1a 60%, #001a1a 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    padding: 24px;
+    box-sizing: border-box;
+  }
+  #title-screen h1 {
+    font-size: 96px;
+    margin: 0;
+    background: linear-gradient(180deg, #ffea00 0%, #ff3300 50%, #cc0000 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 50px rgba(255, 100, 0, 0.6);
+    letter-spacing: 8px;
+    font-weight: 900;
+    font-style: italic;
+    transform: skewX(-8deg);
+  }
+  #title-screen .subtitle {
+    margin-top: 4px;
+    font-size: 16px;
+    letter-spacing: 6px;
+    opacity: 0.7;
+    color: #ff7733;
+  }
+  #title-screen p {
+    max-width: 540px;
+    text-align: center;
+    line-height: 1.55;
+    opacity: 0.85;
+    margin: 22px 0 8px 0;
+  }
+  .mode-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .mode-btn {
+    padding: 10px 18px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 2px solid rgba(255, 100, 0, 0.4);
+    color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    transition: all 0.15s;
+  }
+  .mode-btn:hover { background: rgba(255, 100, 0, 0.15); }
+  .mode-btn.selected {
+    background: linear-gradient(180deg, #ff7700, #cc3300);
+    border-color: #ffaa00;
+    box-shadow: 0 0 20px rgba(255, 120, 0, 0.5);
+  }
+  #start-btn {
+    margin-top: 28px;
+    padding: 16px 56px;
+    font-size: 22px;
+    background: linear-gradient(180deg, #ffcc00, #ff5500);
+    color: #1a0a00;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 900;
+    font-family: inherit;
+    letter-spacing: 3px;
+    box-shadow: 0 6px 24px rgba(255, 100, 0, 0.4);
+    transition: transform 0.1s;
+  }
+  #start-btn:hover { transform: scale(1.05); }
+  #start-btn:active { transform: scale(0.98); }
+
+  #controls-info {
+    margin-top: 24px;
+    font-size: 13px;
+    opacity: 0.7;
+    text-align: center;
+    line-height: 1.7;
+  }
+  #controls-info .key {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    margin: 0 2px;
+  }
+
+  #hud {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    display: flex;
+    justify-content: space-between;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .car-stat {
+    background: rgba(0, 0, 0, 0.65);
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 2px solid;
+    font-weight: bold;
+    min-width: 120px;
+    text-align: center;
+  }
+  .car-stat.red { border-color: #ff3333; box-shadow: 0 0 15px rgba(255, 50, 50, 0.4); }
+  .car-stat.blue { border-color: #3399ff; box-shadow: 0 0 15px rgba(50, 150, 255, 0.4); }
+  .car-stat .name { font-size: 12px; opacity: 0.85; letter-spacing: 2px; }
+  .car-stat .lap { font-size: 22px; margin-top: 2px; }
+
+  #countdown {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 140px;
+    font-weight: 900;
+    color: #ffea00;
+    text-shadow: 0 0 30px rgba(255, 100, 0, 0.8), 0 0 60px rgba(255, 50, 0, 0.6);
+    z-index: 8;
+    pointer-events: none;
+    display: none;
+    font-style: italic;
+  }
+
+  #win-screen {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 15;
+    text-align: center;
+    padding: 24px;
+  }
+  #win-screen.show { display: flex; }
+  #winner-text {
+    font-size: 64px;
+    font-weight: 900;
+    font-style: italic;
+    letter-spacing: 4px;
+    margin: 0;
+  }
+  #winner-text.red { color: #ff3333; text-shadow: 0 0 40px rgba(255, 50, 50, 0.7); }
+  #winner-text.blue { color: #3399ff; text-shadow: 0 0 40px rgba(50, 150, 255, 0.7); }
+  #win-screen p { font-size: 18px; opacity: 0.85; margin: 16px 0; }
+  .win-buttons {
+    margin-top: 18px;
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .win-buttons button {
+    padding: 14px 32px;
+    font-size: 18px;
+    background: linear-gradient(180deg, #ffcc00, #ff5500);
+    color: #1a0a00;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    font-family: inherit;
+    letter-spacing: 2px;
+    transition: transform 0.1s;
+  }
+  .win-buttons button:hover { transform: scale(1.04); }
+
+  /* Mobile touch controls */
+  #touch-controls {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    display: none;
+    pointer-events: none;
+  }
+  #touch-controls.show { display: block; }
+  .touch-half {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 50%;
+    pointer-events: auto;
+    background: transparent;
+  }
+  .touch-left { left: 0; }
+  .touch-right { right: 0; }
+  .touch-brake {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.12);
+    border: 2px solid rgba(255, 100, 0, 0.5);
+    color: #fff;
+    padding: 14px 28px;
+    border-radius: 30px;
+    font-family: inherit;
+    font-weight: bold;
+    pointer-events: auto;
+    user-select: none;
+  }
+
+  @media (max-width: 600px) {
+    #title-screen h1 { font-size: 64px; letter-spacing: 5px; }
+    #title-screen p { font-size: 14px; }
+    .car-stat { padding: 6px 10px; min-width: 90px; }
+    .car-stat .lap { font-size: 18px; }
+    #countdown { font-size: 100px; }
+    #winner-text { font-size: 44px; }
+    #controls-info { font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="title-screen">
+  <h1>HOT MOTORS</h1>
+  <div class="subtitle">CARRETERA EN LA MONTAÑA</div>
+  <p>Dos coches, una pista sinuosa, tres vueltas. Pero solo uno cruza primero la meta.</p>
+  <div class="mode-row">
+    <button class="mode-btn selected" data-mode="vs-ai">1 jugador (vs IA)</button>
+    <button class="mode-btn" data-mode="vs-human">2 jugadores</button>
+  </div>
+  <button id="start-btn">EMPEZAR</button>
+  <div id="controls-info">
+    <div><b style="color:#ff5555">Rojo</b>: <span class="key">W</span> acelerar · <span class="key">S</span> frenar · <span class="key">A</span>/<span class="key">D</span> girar</div>
+    <div><b style="color:#5599ff">Azul</b>: <span class="key">↑</span> acelerar · <span class="key">↓</span> frenar · <span class="key">←</span>/<span class="key">→</span> girar</div>
+  </div>
+</div>
+
+<div id="hud" style="display: none;">
+  <div class="car-stat red">
+    <div class="name">ROJO</div>
+    <div class="lap"><span id="red-lap">1</span>/3</div>
+  </div>
+  <div class="car-stat blue">
+    <div class="name">AZUL</div>
+    <div class="lap"><span id="blue-lap">1</span>/3</div>
+  </div>
+</div>
+
+<div id="countdown"></div>
+
+<div id="touch-controls">
+  <div class="touch-half touch-left" id="touch-left"></div>
+  <div class="touch-half touch-right" id="touch-right"></div>
+  <button class="touch-brake" id="touch-brake">FRENO</button>
+</div>
+
+<div id="win-screen">
+  <h1 id="winner-text">¡ROJO GANA!</h1>
+  <p id="win-detail"></p>
+  <div class="win-buttons">
+    <button id="restart-btn">REVANCHA</button>
+    <button id="menu-btn">MENÚ PRINCIPAL</button>
+  </div>
+</div>
+
+<div id="game"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
